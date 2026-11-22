@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<!-- =============================================================
+     TIMELINE 앱 껍데기
+     · 할 일은 딱 하나: 아래 APP_URL 따옴표 안에 내 웹앱 주소(/exec 로 끝나는 주소)를 붙여 넣기
+     ============================================================= -->
+<script>
+  var APP_URL = "여기에_웹앱_주소를_붙여_넣으세요";
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>TIMELINE</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TIMELINE">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  html, body { margin: 0; height: 100%; background: #fff; overflow: hidden; overscroll-behavior: none; }
+  body { font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; -webkit-tap-highlight-color: transparent; }
+  /* 웹앱을 화면 전체에 꽉 채움 */
+  #app { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+  /* 시작 화면: 웹앱이 다 뜰 때까지 아이콘 + 점 세 개 */
+  #splash { position: fixed; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: #fff;
+    transition: opacity .35s ease, visibility 0s linear .35s; }
+  #splash.hide { opacity: 0; visibility: hidden; }
+  #splash img { width: 92px; height: 92px; border-radius: 22px; box-shadow: 0 12px 28px -12px rgba(240, 52, 95, .55); }
+  .dots { display: flex; gap: 7px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: #ff5a7a; animation: dot 1s ease-in-out infinite; }
+  .dots i:nth-child(2) { animation-delay: .15s; }
+  .dots i:nth-child(3) { animation-delay: .3s; }
+  @keyframes dot { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
+  /* 안 열릴 때 안내 (로그인이 필요하거나 주소를 아직 안 넣었을 때) */
+  #help { position: fixed; left: 16px; right: 16px; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 6; padding: 18px 16px 16px; border-radius: 20px; background: #fff;
+    box-shadow: 0 18px 40px -14px rgba(30, 30, 60, .35), 0 0 0 1px #ececf0; text-align: center; display: none; }
+  #help.show { display: block; animation: up .3s cubic-bezier(.2, .7, .2, 1); }
+  @keyframes up { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+  #help b { display: block; font-size: 16px; color: #2b2b33; }
+  #help p { margin: 6px 0 14px; font-size: 13px; line-height: 1.5; color: #8a8a96; }
+  #help button { width: 100%; height: 48px; border: 0; border-radius: 14px; font: 700 15px inherit; font-family: inherit; }
+  #help .go { background: #ff5a7a; color: #fff; }
+  #help .re { margin-top: 8px; background: #f3f3f5; color: #2b2b33; }
+</style>
+</head>
+<body>
+  <div id="splash"><img src="icon-192.png" alt=""><div class="dots"><i></i><i></i><i></i></div></div>
+  <div id="help">
+    <b id="helpT">조금 오래 걸리고 있어요</b>
+    <p id="helpP">구글 로그인이 필요할 수 있어요.<br>아래 버튼으로 한 번 열어 로그인해 주세요.</p>
+    <button class="go" id="go">TIMELINE 열기</button>
+    <button class="re" id="re">다시 시도</button>
+  </div>
+
+<script>
+  (function () {
+    var splash = document.getElementById("splash"), help = document.getElementById("help");
+    var ok = /^https:\/\/script\.google\.com\/.+\/exec/.test(APP_URL);
+
+    // 주소를 아직 안 넣었으면 안내만
+    if (!ok) {
+      splash.classList.add("hide");
+      document.getElementById("helpT").textContent = "웹앱 주소를 넣어 주세요";
+      document.getElementById("helpP").innerHTML = "index.html 맨 위 APP_URL 에<br>/exec 로 끝나는 웹앱 주소를 붙여 넣으면 됩니다.";
+      document.getElementById("go").style.display = "none";
+      document.getElementById("re").style.display = "none";
+      help.classList.add("show");
+      return;
+    }
+
+    // 웹앱을 화면 전체에 띄움
+    var f = document.createElement("iframe");
+    f.id = "app";
+    f.title = "TIMELINE";
+    f.allow = "fullscreen; clipboard-write";
+    f.src = APP_URL;
+    document.body.appendChild(f);
+
+    // 웹앱이 다 뜨면 Index.html 이 "ready" 신호를 보냄 → 시작 화면 걷음
+    var ready = false;
+    window.addEventListener("message", function (e) {
+      if (e.data && e.data.timeline === "ready") {
+        ready = true;
+        splash.classList.add("hide");
+        help.classList.remove("show");
+      }
+    });
+    // 15초가 지나도 신호가 없으면 (로그인 필요 · 아이폰 쿠키 제한 등) 안내를 띄움
+    setTimeout(function () {
+      if (ready) return;
+      splash.classList.add("hide");
+      help.classList.add("show");
+    }, 15000);
+
+    document.getElementById("go").onclick = function () { location.href = APP_URL; };
+    document.getElementById("re").onclick = function () { location.reload(); };
+  })();
+
+  // 설치형 앱으로 동작하게 (껍데기 파일만 저장 · 일정 데이터는 저장하지 않음)
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
+</script>
+</body>
+</html>
