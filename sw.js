@@ -1,21 +1,49 @@
-// TIMELINE 앱 껍데기용 서비스 워커
-//  · 껍데기 파일(아이콘 등)만 저장해 두고, 일정 데이터(구글 웹앱)는 건드리지 않음
-//  · index.html 은 항상 인터넷에서 새로 받음 → 주소를 고치면 바로 반영 (인터넷이 없을 때만 저장본)
-const CACHE = "timeline-shell-v1";
+// TIMELINE 앱 서비스 워커 — 아이콘을 누르면 바로 열리게
+//  · 앱 화면 파일(index.html · 아이콘): 기기에 저장해 둔 걸 바로 보여 주고, 뒤에서 새 버전을 받아 둠
+//    → GitHub 에서 index.html 을 고치면 "그다음 번" 실행부터 반영됨
+//  · 글꼴(구글 폰트 · 에스코어드림): 한 번 받으면 계속 기기에 저장된 걸 씀
+//  · 일정 데이터(script.google.com)는 저장하지 않고 항상 서버에서 받음
+const SHELL = "timeline-shell-v2";
+const FONTS = "timeline-fonts-v1";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png", "favicon.png"];
+const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com", "cdn.jsdelivr.net"];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
 });
+
 self.addEventListener("activate", (e) => {
-  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
-});
-self.addEventListener("fetch", (e) => {
-  const url = new URL(e.request.url);
-  if (e.request.method !== "GET" || url.origin !== location.origin) return;   // 구글 웹앱 요청은 그대로 통과
-  e.respondWith(
-    fetch(e.request)
-      .then((res) => { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); return res; })
-      .catch(() => caches.match(e.request))
+  e.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== SHELL && k !== FONTS).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
+});
+
+self.addEventListener("fetch", (e) => {
+  const req = e.request;
+  if (req.method !== "GET") return;                       // 서버 요청(POST)은 그대로 통과
+  const url = new URL(req.url);
+
+  // 글꼴: 저장본 먼저, 없으면 받아서 저장
+  if (FONT_HOSTS.includes(url.hostname)) {
+    e.respondWith(
+      caches.open(FONTS).then((c) => c.match(req).then((hit) => hit || fetch(req).then((res) => {
+        if (res.ok || res.type === "opaque") c.put(req, res.clone());
+        return res;
+      })))
+    );
+    return;
+  }
+
+  // 앱 파일: 저장본을 바로 주고, 뒤에서 새로 받아 저장 (인터넷이 없어도 열림)
+  if (url.origin === location.origin) {
+    e.respondWith(
+      caches.open(SHELL).then((c) => c.match(req, { ignoreSearch: true }).then((hit) => {
+        const fresh = fetch(req).then((res) => { if (res.ok) c.put(req, res.clone()); return res; }).catch(() => hit);
+        if (hit) { e.waitUntil(fresh); return hit; }
+        return fresh;
+      }))
+    );
+  }
 });
