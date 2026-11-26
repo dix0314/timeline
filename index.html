@@ -84,9 +84,16 @@
      · header 자체는 투명 · 눌리지 않음 → 바(.tabs)와 달력(.cal)만 눌림 */
   :root { --navh: 70px; }   /* 바 높이 + 아래 여백 (본문 · 알림이 가리지 않게) */
   header { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; padding: 0 10px calc(10px + env(safe-area-inset-bottom)); pointer-events: none; }
+  /* 분홍 유리 바: 뒤 화면이 흐리게 비치고 · 위쪽 가장자리에 빛 · 버튼은 반투명 흰 유리, 고른 것만 흰 바탕 */
   .tabs { display: flex; align-items: center; gap: 4px; padding: 8px 10px; max-width: calc(var(--maxw) - 20px); margin: 0 auto; pointer-events: auto;
-    border-radius: 22px; background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: blur(16px) saturate(1.6); backdrop-filter: blur(16px) saturate(1.6);
-    box-shadow: 0 12px 30px -12px rgba(30, 20, 50, .38), 0 0 0 1px rgba(30, 20, 50, .06); }
+    border-radius: 22px; background: linear-gradient(135deg, rgba(255, 128, 156, .72), rgba(255, 74, 112, .74));
+    -webkit-backdrop-filter: blur(18px) saturate(1.8); backdrop-filter: blur(18px) saturate(1.8);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), inset 0 0 0 1px rgba(255, 255, 255, .22), 0 14px 30px -12px rgba(232, 40, 90, .55); }
+  .tabs .tab, .tabs .arrow, .tabs .ibtn { background: rgba(255, 255, 255, .2); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
+  .tabs .tab.active, .tabs .ibtn.on { background: #fff; color: var(--hot); box-shadow: 0 2px 8px -3px rgba(150, 20, 60, .45); }
+  .tabs .arrow:disabled { opacity: .35; }
+  .tabs .tools { border-left-color: rgba(255, 255, 255, .35); }
+  body.theme-lv .tabs { background: linear-gradient(135deg, rgba(150, 120, 245, .72), rgba(110, 200, 150, .72)); }
   .tabs .tl { padding: 0 11px; font-size: 12px; }
   .tools { display: flex; gap: 4px; margin-left: 4px; padding-left: 8px; border-left: 1px solid var(--line); }
   .ibtn { width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--grey); color: #6b6b78; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
@@ -191,7 +198,7 @@
   .cal-mt.scrub *, .cal-mt.scrub *::before { animation-play-state: paused !important; }
   /* ---------- 달 줄 (지하철) ---------- */
   .cbot { display: flex; align-items: center; gap: 8px; margin: 10px -4px 0; padding-top: 10px; border-top: 1px solid var(--line); }
-  .cb-today { flex: none; height: 30px; padding: 0 11px; border: 0; border-radius: 999px; background: var(--grey); color: var(--ink); font: 700 12px var(--font-body); transition: opacity .2s; }
+  .cb-today { position: absolute; top: 12px; right: 14px; z-index: 3; height: 28px; padding: 0 13px; border: 0; border-radius: 999px; background: #24242c; color: #fff; font: 700 12px var(--font-body); transition: opacity .2s; }
   .cb-today.here { opacity: .45; }                                  /* 이미 이번 달 */
   .mline { position: relative; flex: 1 1 auto; min-width: 0; height: 46px; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; cursor: grab;
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent); mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent); }
@@ -345,8 +352,8 @@
   .mini.mk i { flex: none; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
   .mini.mm { border-radius: 2px; background: linear-gradient(160deg, #fff7c4, #ffe98c); color: #5c4a0a; box-shadow: 0 3px 5px -3px rgba(120, 90, 0, .35); transform: rotate(var(--rot, -1.5deg)); }
   .hero-pill { font: 800 11px/1 var(--font-num); letter-spacing: 1px; padding: 5px 9px; border-radius: 999px; background: var(--soft); color: var(--rose); }
-  .hero-pill.sun { background: #ffe1e7; color: #e51440; }
-  .hero-pill.hot { background: var(--hot); color: #fff; }
+  .hero-pill.hot { background: var(--hot); color: #fff; height: 20px; display: inline-flex; align-items: center; padding: 0 9px 0 9.9px; font-size: 10.5px; line-height: 1; letter-spacing: .9px; }
+  .hero-pill.wpill { margin-left: 0; }   /* 날짜 화면 요일: TIMELINE 요일 알약과 같은 크기 · 색 규칙 */
 
   .sec { font: 400 12px var(--font-cal); letter-spacing: 1.2px; color: var(--sub); margin: 24px 0 10px; }   /* SCHEDULE · MORE KEY EVENTS: 번지 (시험) */
   /* TIMELINE: 위 날짜 바로 아래 SCHEDULE — 위 날짜 글씨 아래 빈 공간(약 7px)까지 감안해서 위아래 공백이 같아 보이게
@@ -426,12 +433,12 @@
   .elab { position: absolute; left: 0; width: var(--gut); padding-right: 12px; text-align: right; white-space: nowrap; font: 700 11px var(--font-num); color: var(--rose); }   /* 줄높이를 빈 칸 시간 글자(.gut)와 같게 */
   .elab.first { top: 8px; }
   .eline { position: absolute; left: 0; right: 0; border-top: 1px solid rgba(196, 80, 106, .07); }
-  .evbody { position: absolute; top: 0; left: calc(var(--gut) + 6px); right: 0; padding: 5px 10px 0 0; }
+  /* 카드 안 내용: 알약 · 이름 · 소요 시간 칩을 한 줄로, 카드 세로 가운데 */
+  .evbody { position: absolute; top: 0; bottom: 0; left: calc(var(--gut) + 6px); right: 0; padding: 0 9px 0 0; display: flex; align-items: center; gap: 6px; }
   .ev.narrow .evbody { left: 12px; padding-right: 6px; }
-  .evtime { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .evname {
-    margin-top: 4px; padding-left: 8px; border-left: 2px dotted var(--dotline);
-    font: 400 12.5px var(--font-body); color: var(--ink);   /* 날짜 화면 일정 이름: 작고 얇게 (에스코어드림 4Regular) */
+    flex: 1 1 auto; min-width: 0; margin-top: 0; padding-left: 8px; border-left: 2px dotted var(--dotline);
+    font: 500 12.5px var(--font-body); color: var(--ink);   /* 날짜 화면 일정 이름 (에스코어드림 5Medium) */
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .endpill .nxd { display: inline-block; vertical-align: 0; margin-right: 3px; }
@@ -440,35 +447,37 @@
   .xpill { background: #ececf0; color: #8a8a96; letter-spacing: .3px; }
   .ev.past .xpill { background: #dedee4; color: #a3a3ad; }
   .evbody .dur { padding: 1px 8px; font-size: 10.5px; flex: 0 0 auto; }
-  /* 30분 이하: 한 줄 */
-  .ev.one .evbody { display: flex; align-items: center; gap: 6px; top: 0; bottom: 0; padding: 0 10px 0 0; }
-  .ev.one .evname { margin-top: 0; flex: 1 1 auto; min-width: 0; }
   .ev.one .elab.first { top: 50%; transform: translateY(-50%); }
-  /* 1시간 이상: 끝 시간 알약을 왼쪽 시작 시간과 한 줄에 맞추고, 이름은 그 아래 */
-  .ev:not(.one) .evbody { padding-top: 5px; }
-  .ev:not(.one) .evname { margin-top: 6px; }   /* 이름을 알약에서 조금 더 아래로 */
   .ev:not(.one) .elab.first { top: 6px; line-height: normal; }   /* 빈 칸의 시간 글자(.gut)와 같은 높이 */
+  /* 소요 시간 칩 (BASIC): 이름 오른쪽 끝 · 시계 + "1시간" (다음 날로 이어지면 시계 대신 "다음 날로" 심볼) */
+  .lenchip { flex: none; display: inline-flex; align-items: center; gap: 3px; height: 20px; padding: 0 7px 0 5px; border-radius: 999px;
+    box-shadow: inset 0 0 0 1px #f2a3b6; background: rgba(255, 255, 255, .55); color: #e0426a; font: 600 10.5px/1 var(--font-body); white-space: nowrap; }
+  .lenchip svg { width: 11px; height: 11px; flex: none; }
+  .ev.live .lenchip { background: #fff; box-shadow: inset 0 0 0 1px var(--hot); }
+  .ev.m-imp .lenchip { box-shadow: inset 0 0 0 1px #efc65a; color: #b37f00; background: rgba(255, 255, 255, .7); }
+  .ev.m-tbd .lenchip { box-shadow: inset 0 0 0 1px #f2c4cf; color: #c46f86; }
+  .ev.past .lenchip { box-shadow: inset 0 0 0 1px #d4d4db; color: #a3a3ad; background: transparent; }
 
-  /* FROM: 1시간 카드 (바로 뒤 1시간 안에 다음 일정이 있으면 30분) + 그 아래로 시작 후 2시간 지점까지 옅어지는 꼬리
-     · 다른 일정과 나란히 놓지 않고 맨 아래에 깔림 → 뒤 일정은 그 위에 겹쳐 보임 (z-index)
-     · --tc: 꼬리 바탕색 · --ts: 꼬리 띠 색 (상태마다 카드 색과 같게) */
-  .ev.k-in { z-index: 1; --tc: 255, 238, 242; --ts: 247, 160, 178; }
-  .ev.k-in.live { --tc: 255, 217, 226; --ts: 255, 90, 122; }
-  .ev.k-in.past { --tc: 233, 233, 238; --ts: 212, 212, 219; }
-  .ev.k-in.hastail .evcard { bottom: 0; border-radius: 2px 10px 0 0; }
-  .evtail { position: absolute; left: 0; right: 0; top: 100%; pointer-events: none; }
-  /* 바탕 · 띠: 시작 후 60분 지점(--fs)까지 진하게 → 그 뒤 20분 안에(--fe) 빠르게 사라짐 (곡선으로 옅어져 끝 경계가 안 보이게)
-     · --fs · --fe 는 꼬리 길이에 대한 % (cardHtml 이 넣음) */
-  .evfade { position: absolute; inset: 0; border-radius: 0 0 10px 2px; background: rgb(var(--tc));
-    --mk: linear-gradient(#000 var(--fs, 0%), rgba(0, 0, 0, .74) calc(var(--fs, 0%) + (var(--fe, 67%) - var(--fs, 0%)) * .22), rgba(0, 0, 0, .44) calc(var(--fs, 0%) + (var(--fe, 67%) - var(--fs, 0%)) * .48),
-      rgba(0, 0, 0, .18) calc(var(--fs, 0%) + (var(--fe, 67%) - var(--fs, 0%)) * .74), rgba(0, 0, 0, .05) calc(var(--fs, 0%) + (var(--fe, 67%) - var(--fs, 0%)) * .9), transparent var(--fe, 67%));
-    -webkit-mask-image: var(--mk); mask-image: var(--mk); }
-  .evfade::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; border-radius: 0 0 0 2px; background: rgb(var(--ts)); }
-  /* 꼬리 안의 시간 글자(4 PM 등)는 꼬리에 가려지지 않고 시간표 글자와 똑같이 또렷하게 */
-  .evtail .elab { color: var(--sub); font-weight: 600; }
-  /* 바로 뒤에 일정이 붙어 30분 카드가 되면: 카드 아래에 점선 구분선 */
-  .fromcut { position: absolute; left: 5px; right: 6px; bottom: 0; z-index: 3; border-top: 1.5px dashed rgba(var(--ts), .85); pointer-events: none; }
-  .ev.delwait .evtail, .ev.delwait .fromcut { display: none; }
+  /* FROM (시간표): 시각 라인(점 + 가로선) 위에 깃발 태그 — 카드 없이 맨 아래에 깔림, 뒤 일정은 위에 겹침
+     · 태그만 눌림 · 진행 중(60분)은 점이 두근 · 끝나면 회색 */
+  .ev.fromln { z-index: 1; pointer-events: none; --fl: #e8466f; }
+  .ev.fromln .elab.first { top: 6px; line-height: normal; color: var(--fl); }
+  .fl-line { position: absolute; left: calc(var(--gut) - 2px); right: 0; top: 12px; height: 2px; border-radius: 1px; background: var(--fl); font-style: normal; }
+  .fl-dot { position: absolute; left: calc(var(--gut) - 7px); top: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--fl); box-shadow: 0 0 0 2.5px #fff; font-style: normal; }
+  .fl-tag { position: absolute; left: calc(var(--gut) + 12px); top: 2px; height: 22px; max-width: calc(100% - var(--gut) - 24px); pointer-events: auto; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px; padding: 0 17px 0 8px; border-radius: 3px 0 0 3px; background: var(--fl); color: #fff;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 50%, 100% 100%, 0 100%); box-shadow: 0 0 0 2px #fff; }
+  .fl-tag svg { flex: none; width: 12px; height: 12px; }
+  .fl-tag b { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 600 12.5px var(--font-body); }
+  .fl-tag small { flex: none; font: 500 10px var(--font-body); opacity: .8; }
+  .fl-tag .dwait.sv { color: #fff; }
+  .ev.fromln.live { --fl: var(--hot); }
+  .ev.fromln.live .fl-dot { animation: flBeat 1.4s ease-in-out infinite; }
+  @keyframes flBeat { 0%, 100% { box-shadow: 0 0 0 2.5px #fff, 0 0 0 2.5px rgba(255, 90, 122, .35); } 50% { box-shadow: 0 0 0 2.5px #fff, 0 0 0 8px rgba(255, 90, 122, 0); } }
+  .ev.fromln.past { --fl: #c9c9d2; }
+  .ev.fromln.past .fl-tag b { text-decoration: line-through; }
+  .ev.fromln.saving { opacity: .6; }
+  body.theme-lv .ev.fromln:not(.past) { --fl: #8f63e8; }
 
   /* UNTIL: 기본 분홍을 회색 쪽으로 눌러 둔탁하게 (FROM 은 BASIC 과 똑같이) */
   .ev.k-out .evcard { background: #eddfe3; }
@@ -594,14 +603,13 @@
   .daycard.tmr { --cbg: #fff4f7; }
   .khead { position: relative; }
   .khead .dch { z-index: 2; }
-  .khead .dd8 { text-shadow: 0 0 3px var(--cbg), 0 0 7px var(--cbg), 0 0 12px var(--cbg); }
-  .kband { position: relative; height: var(--kh); margin-top: -12px; }
+  .kband { position: relative; height: var(--kh); margin-top: 9px; }
   .kglow { position: absolute; left: var(--kx); right: 0; top: 0; bottom: 0; width: calc(100% - var(--kx)); height: 100%; object-fit: cover; pointer-events: none;
     filter: blur(24px) saturate(1.5); opacity: .5;
     -webkit-mask-image: radial-gradient(ellipse 75% 70% at 32% 58%, #000 15%, transparent 72%); mask-image: radial-gradient(ellipse 75% 70% at 32% 58%, #000 15%, transparent 72%); }
   .kph { position: absolute; left: var(--kx); top: 0; bottom: 0; max-width: calc(100% - var(--kx)); border-radius: 10px; overflow: hidden;
     box-shadow: 0 6px 14px -10px rgba(30, 20, 40, .5);
-    -webkit-mask-image: linear-gradient(rgba(0, 0, 0, .28), #000 30px); mask-image: linear-gradient(rgba(0, 0, 0, .28), #000 30px); }
+    -webkit-mask-image: linear-gradient(#000 calc(100% - 44px), rgba(0, 0, 0, .3) calc(100% - 10px), rgba(0, 0, 0, .22)); mask-image: linear-gradient(#000 calc(100% - 44px), rgba(0, 0, 0, .3) calc(100% - 10px), rgba(0, 0, 0, .22)); }
   .kph .thumb { display: block; width: auto; height: 100%; max-width: 100%; aspect-ratio: auto; border-radius: 0; object-fit: contain; background: transparent; }
   .kph div.thumb { width: calc(var(--kh) * 16 / 9); background: #f6d9e0; }      /* 사진 받기 전 자리 */
   .daycard.today .kph { box-shadow: 0 0 0 2px #fff, 0 6px 14px -10px rgba(30, 20, 40, .5); }
@@ -618,7 +626,10 @@
   .kln .lbtn { width: 22px; height: 22px; margin: -2px -3px -2px -2px; color: inherit; }
   .kln .lbtn .lico { width: 16px; height: 16px; }
   .daycard.today .kln { color: #c8103f; }
-  .khead + .klines { margin-top: 9px; }
+  /* 사진이 있으면 이름 줄이 사진 아래쪽(옅어지는 부분)에 겹침 — 글자 둘레는 카드 바탕색으로 번져 잘 읽힘 */
+  .khead + .klines { position: relative; z-index: 2; margin-top: -31px; }
+  .khead + .klines .kln-t, .khead + .klines .kln-dd { text-shadow: 0 0 3px var(--cbg), 0 0 8px var(--cbg), 0 0 14px var(--cbg); }
+  .khead + .klines .kln { padding-left: 8px; }
   /* 링크: 상자 없이 체인 기호만 (사진 위 · 날짜 화면 · MORE KEY EVENTS 모두 같은 기호) */
   .lbtn { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 30px; height: 30px; color: var(--hot); }
   .lbtn .lico { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -639,10 +650,10 @@
   .dch .sun { color: #e51440; }
   .daycard.today .dch .dd8.sun { color: #e51440; }
   /* 요일 알약: 날짜 줄 오른쪽 끝 · 기본은 차분한 검정 계열 / 오늘 · 내일 · 토 · 일(빨간 날) · 연두보라 날은 색이 다름 */
-  .wpill { margin-left: auto; flex: none; padding: 3px 8px 2px; border-radius: 999px; background: #3a3a46; color: #fff; font: 800 10.5px/1.25 var(--font-num); letter-spacing: .9px; }
+  .wpill { margin-left: auto; flex: none; box-sizing: border-box; width: 44px; height: 20px; padding: 0 0 0 .9px; border-radius: 999px; background: #3a3a46; color: #fff;
+    display: inline-flex; align-items: center; justify-content: center; font: 800 10.5px/1 var(--font-num); letter-spacing: .9px; }   /* 왼쪽 .9px = 글자 간격만큼 → 정확히 가운데 */
   .wpill.w-today { background: #d81e4e; box-shadow: 0 2px 6px -2px rgba(216, 30, 78, .6); }
   .wpill.w-tmr { background: #ef6f8e; }
-  .wpill.w-sat { background: #3f5ad6; }
   .wpill.w-red { background: #e51440; }
   .wpill.w-lv { background: var(--lvgrad); }
   /* 날짜 줄 아래 얇은 실선 */
@@ -707,7 +718,7 @@
 
   /* 시간 줄: 숫자 칸(폭 고정)을 쓰지 않고 글꼴 원래 폭으로 → "11" 사이가 벌어지지 않고, 첫 글자가 일정 이름과 같은 왼쪽 선에서 시작 */
   .dt { display: flex; align-items: center; gap: 6px; font: 700 13px var(--font-num); color: var(--navy); font-variant-numeric: proportional-nums; }
-  .dn { margin-top: 3px; font: 500 13px var(--font-body); color: #33378e; word-break: break-all; }   /* TIMELINE 일정 이름 (예전 14px) */
+  .dn { margin-top: 3px; font: 500 12.5px var(--font-body); color: #33378e; word-break: break-all; }   /* TIMELINE 일정 이름 (예전 14px) */
 
   /* 오늘 카드 (진분홍 바탕) */
   /* 오늘 카드: 반투명 대신 바탕(#ffbccb)에 미리 섞은 불투명 색 → 선과 점이 겹쳐 보이지 않음 */
@@ -1468,9 +1479,10 @@
   var DAYS = 35;                   // 달력 칸 수 (이번 주 일요일부터 5주)
   var MEMO_SLOTS = 3;
   var CACHE_KEY = "rundown_cache_v4", IMG_KEY = "rundown_img_v1";
-  // FROM: 카드 60분(바로 뒤 1시간 안에 다음 일정이 있으면 30분) · 시작 후 60분까지는 진하게, 60 ~ 90분은 강하게 옅어짐(약 20분에서 끊김)
-  //  · 진행 · 종료 판정도 60분짜리 일정처럼 (FROM_LIVE)
-  var FROM_CARD = 60, FROM_SHORT = 30, FROM_SOLID = 60, FROM_FADE = 90, FROM_CUT = 20, FROM_LIVE = 60;
+  // FROM: 진행 · 종료 판정은 60분짜리 일정처럼
+  var FROM_LIVE = 60;
+  var ICON_FLAG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4.5h11l-2.2 3.8L16 12H5"/></svg>';
+  var ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
   var LIVE_FLOW_MS = 2500, NEXT_FLOW_MS = 5000;   // 글자 색이 한 바퀴 흐르는 시간 (CSS --flow 와 같게)
   var DAYS_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   var DAYS_KO = ["일", "월", "화", "수", "목", "금", "토"];
@@ -1701,16 +1713,8 @@
     });
     out.sort(function (x, y) { return x.s - y.s || (y.e - y.s) - (x.e - x.s); });
 
-    // FROM: 다음 일정까지 1시간 이상 비면 1시간 카드, 아니면 30분 카드 + 시작 후 2시간 지점까지 꼬리
-    out.forEach(function (g, i) {
-      if (g.ev.kind !== "in") return;
-      var nx = 1440;
-      for (var j = i + 1; j < out.length; j++) if (out[j].s > g.s) { nx = out[j].s; break; }
-      g.ve = Math.min(1440, g.s + (nx - g.s >= FROM_CARD ? FROM_CARD : FROM_SHORT));
-      g.tail = Math.max(0, Math.min(1440, g.s + FROM_FADE) - g.ve);
-      g.solid = Math.max(0, Math.min(g.tail, g.s + FROM_SOLID - g.ve));     // 꼬리 중 진하게 이어지는 길이 (30분 카드일 때)
-      g.short = g.ve - g.s < FROM_CARD;                                    // 30분 카드 → 아래 점선
-    });
+    // FROM: 카드 대신 그 시각의 가로선 + 깃발 태그 (높이는 한 칸 · 다른 일정과 나란히 놓지 않고 맨 아래)
+    out.forEach(function (g) { if (g.ev.kind === "in") g.ve = Math.min(1440, g.s + 30); });
 
     // 겹치는 일정은 옆으로 나란히 (FROM 은 빼고 맨 아래에 깔아 둠)
     var cols = [], cluster = [], clusterEnd = -1;
@@ -1975,7 +1979,8 @@
       DAYS_KO.map(function (d, i) { return '<span class="' + (i === 0 ? "sun" : "") + '">' + d + "</span>"; }).join("") +
       '</div><div class="cal-vp"><div class="cal-track">' +
       (pg > 0 ? calGridHtml(pg - 1, tk) : '<div class="cal-page cal-none"></div>') +
-      calGridHtml(pg, tk, true) + calGridHtml(pg + 1, tk) + "</div></div>" + mlineHtml(pg);
+      calGridHtml(pg, tk, true) + calGridHtml(pg + 1, tk) + "</div></div>" + mlineHtml(pg) +
+      '<button class="cb-today' + (pg === 0 ? " here" : "") + '">오늘</button>';   // 오른쪽 위 (제목 줄)
     el.innerHTML = h;
     fixDigits(el);
     // 달마다 주 수(4~6줄)가 달라서 → 달력 높이를 지금 달에 맞춰 부드럽게 늘이고 줄임
@@ -2117,8 +2122,8 @@
   // =============================================================
   var MS_GAP = 62, MS_SIDE = 14;                                   // 역 간격(px) · 가운데 앞뒤로 만드는 역 수 (끌어도 끝이 비지 않게)
   var ML_START = new Date(2026, 10, 1);                            // 2026년 11월 — 이보다 앞 달은 회색
-  var YEAR_COL = ["#ff5a7a", "#9a6bf2", "#2fb58a"];                // 해마다 쓸 색 (분홍 → 보라 → 초록 순서로 돌아감 · 2026년 = 분홍)
-  function yearCol(y) { var n = YEAR_COL.length; return YEAR_COL[((y - 2026) % n + n) % n]; }
+  var YEAR_COL = ["#ff5a7a", "#e5326a", "#bf1d55"];                // 올해 분홍 → 다음 해 짙은 분홍 → 그다음 해 더 짙은 분홍 (3년째부터는 마지막 색 그대로)
+  function yearCol(y) { return YEAR_COL[Math.max(0, Math.min(YEAR_COL.length - 1, y - new Date().getFullYear()))]; }
   // 색을 어둡게 (f: 남길 밝기 비율)
   function shade(hex, f) {
     var n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255;
@@ -2129,7 +2134,7 @@
   function mlCol(p) {
     var mo = calMonth(p);
     if (mo < ML_START) return "#d3d3da";
-    return p < 0 ? shade(yearCol(mo.getFullYear()), .7) : yearCol(mo.getFullYear());
+    return p < 0 ? shade(yearCol(mo.getFullYear()), .5) : yearCol(mo.getFullYear());   // 지난 달: 더 짙게
   }
   // 지금 페이지(pg)를 가운데(0번)로 두고 앞뒤 MS_SIDE 개씩 · 역 위치 = 가운데 + 번호 × MS_GAP
   function mlineHtml(pg) {
@@ -2141,8 +2146,7 @@
       var lab = mo.getMonth() === 0 ? String(mo.getFullYear()).slice(2) + "년 1월" : (mo.getMonth() + 1) + "월";
       h += '<button class="ms' + (p === 0 ? " now" : "") + (p < 0 ? " off" : "") + (i === 0 ? " on" : "") + '" data-pg="' + p + '" data-i="' + i + '" style="left:calc(50% + ' + x + "px);--c:" + c + '"><i class="dot"></i><span>' + lab + "</span></button>";
     }
-    return '<div class="cbot"><button class="cb-today' + (pg === 0 ? " here" : "") + '" data-today="1">↩ 오늘</button>' +
-      '<div class="mline"><i class="mlk" style="--c:' + mlCol(pg) + '"></i><div class="mtrack">' + h + "</div></div></div>";
+    return '<div class="cbot"><div class="mline"><i class="mlk" style="--c:' + mlCol(pg) + '"></i><div class="mtrack">' + h + "</div></div></div>";
   }
   // 달 줄을 dx(px)만큼 밀고 (ms 동안 미끄러지며) → ▼ 밑에 가장 가까운 역을 꽉 찬 점(.on)으로, ▼ 색도 그 역 색으로
   function mlineShift(dx, ms) {
@@ -2263,10 +2267,12 @@
     if (c) c.classList.add("pressing");
     cpress.t = setTimeout(calBuzz, LV_GRACE_MS);
   }
-  // 지이잉: 긴 진동 한 번 대신 짧은 진동을 계속 이어 붙임 → 손을 떼면 다음 진동을 안 보내서 바로 멈춤
-  //  (휴대폰에 따라 "진동 멈춰"(vibrate(0))가 안 듣는 경우가 있어서)
-  function buzzStart() { buzzStop(); vib(140); cpress.bz = setInterval(function () { vib(140); }, 120); }
-  function buzzStop() { if (cpress.bz) { clearInterval(cpress.bz); cpress.bz = null; } vib(0); }
+  // 끊기지 않는 진동: 필요한 길이만큼 한 번에 길게 → 멈출 때는 1ms 진동으로 덮어쓴 뒤 0
+  //  (vibrate(0) 만으로는 안 멈추는 휴대폰이 있어서, 짧은 진동으로 바꿔치기해 확실히 끊음)
+  function vibLong(ms) { vib(ms); }
+  function vibStop() { vib(1); vib(0); }
+  function buzzStart() { buzzStop(); cpress.bz = true; vibLong(LV_BUZZ_MS + 400); }
+  function buzzStop() { if (cpress.bz) { cpress.bz = false; vibStop(); } }
   function calBuzz() {                                 // 그대로 계속 누름 → 지이이잉 1.5초
     var k = cpress.k;
     cpress.stage = 2;
@@ -2955,11 +2961,10 @@
       //  · 사진이 여러 장이면 첫 사진을 쓰고, 그날 핵심 일정 이름은 모두 사진 안에 적음
       var pic = majors.filter(function (m) { return safeUrl(m.img); })[0];
       var red = isRed(k);
-      // 요일 알약 색: 오늘 > 연두보라 날 > 일요일 · 빨간 날 > 토요일 > 내일 > 기본(검정 계열)
-      var wk = isToday ? "today" : isLv(k) ? "lv" : red ? "red" : p.dow === 6 ? "sat" : k === tmrK ? "tmr" : "";
+
       h += '<div class="daycard' + (isToday ? " today" : "") + (k === tmrK ? " tmr" : "") + (pic ? " haspic" : "") + '" data-open="' + k + '">';
       var dch = '<div class="dch"><span class="dd8' + (red ? " sun" : "") + '">' + p.y + ". " + p.m + ". " + p.d + "</span>" +
-        '<span class="wpill' + (wk ? " w-" + wk : "") + '">' + DAYS_EN[p.dow] + "</span></div>";
+        '<span class="wpill ' + dowCls(k) + '">' + DAYS_EN[p.dow] + "</span></div>";
       h += pic ? '<div class="khead">' + dch + kbandHtml(pic) + "</div>" : dch;
       h += keyLinesHtml(majors);
 
@@ -3017,6 +3022,11 @@
 
   // ---------- TIMELINE 핵심 일정 ----------
   // 사진 띠: 사진은 원래 비율 그대로 왼쪽(--kx)에 · 오른쪽 빈 곳은 같은 사진을 흐리게 번진 색 (사진이 아직 없으면 자리만)
+  // 요일 알약 색: 오늘 > 연두보라 날 > 일요일 · 빨간 날 > 내일 > 기본(검정 계열) — TIMELINE · 날짜 화면 같은 규칙
+  function dowCls(k) {
+    var tk = todayKey();
+    return k === tk ? "w-today" : isLv(k) ? "w-lv" : isRed(k) ? "w-red" : k === addDays(tk, 1) ? "w-tmr" : "";
+  }
   function kbandHtml(pic) {
     var src = imgCache[pic.img];
     return '<div class="kband">' + (src ? '<img class="kglow" src="' + esc(src) + '" alt="" aria-hidden="true">' : "") + '<div class="kph">' + imgTag(pic.img) + "</div></div>";
@@ -3163,33 +3173,24 @@
       }
     }
 
-    // 다음 날로 넘어가는 일정: 끝 시간 앞에 "다음 날로" 심볼 (OVERNIGHT · CONTINUED 글자는 없음)
-    var pills = (narrow ? '<span class="tm">' + fmtMinAmPm(g.s) + "</span>" : "") + (e.delPending ? '<span class="dwait"><i></i>삭제 대기중</span>' : "") + (e.saving ? '<span class="dwait sv"><i></i>저장 중</span>' : "") + (e.delPending ? "" : kind === "norm"
-      ? '<span class="endpill">' + (g.cont ? ICON_NEXTDAY : "- ") + g.endAmPm + "</span>"
-      : '<span class="dur d-' + kind + '">' + kindLabel(kind) + "</span>") +
-      (e.noTime ? '<span class="xpill">NO TIME</span>' : "");
     var nm2 = esc(e.name);
-    var body = one
-      ? pills + '<span class="evname">' + nm2 + "</span>"
-      : '<div class="evtime">' + pills + '</div><div class="evname">' + nm2 + "</div>";
-
-    // FROM 꼬리: 옅어지는 바탕 + 그 위에 정시 시간 글자 · 선 (꼬리에 가려지지 않게)
-    var tail = "";
-    if (!list && kind === "in") {
-      if (g.tail > 0) {
-        var tl = "";
-        for (var t2 = Math.ceil(g.ve / 60) * 60; t2 < g.ve + g.tail; t2 += 60) {
-          var o2 = (t2 - g.ve) / 30 * SLOT;
-          tl += '<div class="eline" style="top:' + (o2 - 1) + 'px"></div><div class="elab" style="top:' + (o2 + 6) + 'px">' + fmtMinAmPm(t2) + "</div>";
-        }
-        var fs = g.solid / g.tail * 100, fe = Math.min(100, (g.solid + FROM_CUT) / g.tail * 100);
-        tail = '<div class="evtail" style="height:' + (g.tail / 30 * SLOT) + 'px"><i class="evfade" style="--fs:' + fs.toFixed(1) + '%;--fe:' + fe.toFixed(1) + '%"></i>' + tl + "</div>";
-      }
-      if (g.short) tail += '<i class="fromcut"></i>';
+    // FROM (시간표): 그 시각에 점 + 가로선, 선 위에 깃발 태그 "🏳 이름 부터" — 태그만 눌림 (선 위 빈 곳은 일정 추가)
+    if (kind === "in" && !list) {
+      return '<div class="ev k-in fromln' + (past ? " past" : "") + (live ? " live" : "") + (e.saving ? " saving" : "") + '" style="top:' + (g.s / 30 * SLOT) + "px;left:0;right:0;height:" + SLOT + 'px" data-edit="' + e.id + '">' +
+        // 정각이면 시간표 글자(5 PM)가 이미 그 자리에 있으므로 따로 쓰지 않음 (겹쳐 두꺼워 보이지 않게)
+        (g.s % 60 ? '<div class="elab first"><span class="elt">' + fmtMinAmPm(g.s) + "</span></div>" : "") + '<i class="fl-line"></i><i class="fl-dot"></i>' +
+        '<span class="fl-tag">' + ICON_FLAG + "<b>" + nm2 + "</b><small>부터</small>" + (e.saving ? '<span class="dwait sv"><i></i></span>' : "") + "</span></div>";
     }
-    return '<div class="ev k-' + kind + (g.tail > 0 && tail ? " hastail" : "") + (mark ? " m-" + mark : "") + (one ? " one" : "") + (narrow ? " narrow" : "") + (past ? " past" : "") + (live ? " live" : "") + (e.delPending ? " delwait" : "") + (e.saving ? " saving" : "") +
+    // 알약: (나란히 놓인 칸이면 시작 시각) · 대기 표시 · FROM/UNTIL · 시간 미정 — 이름 오른쪽 끝에는 소요 시간 칩 (BASIC)
+    var pills = (narrow ? '<span class="tm">' + fmtMinAmPm(g.s) + "</span>" : "") + (e.delPending ? '<span class="dwait"><i></i>삭제 대기중</span>' : "") + (e.saving ? '<span class="dwait sv"><i></i>저장 중</span>' : "") +
+      (kind !== "norm" && !e.delPending ? '<span class="dur d-' + kind + '">' + kindLabel(kind) + "</span>" : "") +
+      (e.noTime ? '<span class="xpill">NO TIME</span>' : "");
+    var chip = kind === "norm" && !narrow && !e.delPending ? '<span class="lenchip">' + (g.cont ? ICON_NEXTDAY : ICON_CLOCK) + esc(lenText(e.len).trim() || "30분") + "</span>" : "";
+    var body = pills + '<span class="evname">' + nm2 + "</span>" + chip;   // 한 줄 · 카드 세로 가운데
+
+    return '<div class="ev k-' + kind + (mark ? " m-" + mark : "") + (one ? " one" : "") + (narrow ? " narrow" : "") + (past ? " past" : "") + (live ? " live" : "") + (e.delPending ? " delwait" : "") + (e.saving ? " saving" : "") +
       (list ? " static" : "") + '" style="' + pos + '" data-edit="' + e.id + '">' +
-      '<div class="evcard">' + (mark === "imp" ? '<span class="star evstar"></span>' : "") + labels + '<div class="evbody">' + body + "</div></div>" + tail + "</div>";
+      '<div class="evcard">' + (mark === "imp" ? '<span class="star evstar"></span>' : "") + labels + '<div class="evbody">' + body + "</div></div></div>";
   }
 
   function renderDay(key) {
@@ -3208,7 +3209,7 @@
     // 스크롤해서 작아진 상태면 처음부터 작게 그림 (1분마다 다시 그려도 커졌다 작아졌다 하지 않게)
     var h = '<div class="hero hero-stroke hero-day' + (state.heroCompact ? " compact" : "") + (state.lvPop === key ? " lvpop" : "") + (state.heroMinis ? " minis" : "") + '">' + y1.svg +
       '<div class="hero-main">' + y2.svg +
-      '<span class="hero-pill' + (isRed(key) ? " sun" : "") + '">' + DAYS_EN[dp.dow] + "</span>" +
+      '<span class="hero-pill wpill ' + dowCls(key) + '">' + DAYS_EN[dp.dow] + "</span>" +
       (isToday ? '<span class="hero-pill hot">TODAY</span>' : "") + "</div>" + miniHtml(key) + "</div>";
     return h;
   }
@@ -4329,12 +4330,12 @@
   $("edSave").onclick = function () { if (!this.disabled) submit(state.edit.mode); };
 
   // ---------- 삭제: 휴지통을 3초 꾹 (일정 · 메모 같은 방식) ----------
-  //  · 누르는 동안: 휴지통에 빨강이 차오르고 · 진동이 점점 세지고 · 창이 점점 세게 흔들리며 색이 빠짐
+  //  · 누르는 동안: 휴지통에 빨강이 차오르고 · 진동이 끊기지 않고 이어지고 · 창이 점점 세게 흔들리며 색이 빠짐
   //  · 3초 전에 떼면: "꾹 눌러야 삭제돼요" 알림 / 3초를 채우면: 창이 닫히고 DELETED 연출 → 삭제
   //  · 아이폰은 브라우저가 진동을 지원하지 않아 진동만 빠짐
   var HOLD_MS = 3000;
   function holdTrash(btn, sheet, onDone) {
-    var t0 = 0, raf = 0, buzz = 0, on = false;
+    var t0 = 0, raf = 0, on = false;
     function set(p) {
       btn.style.setProperty("--hp", p.toFixed(3));
       sheet.style.setProperty("--hp", p.toFixed(3));
@@ -4343,7 +4344,7 @@
     }
     function stop() {
       on = false;
-      cancelAnimationFrame(raf); clearInterval(buzz);
+      cancelAnimationFrame(raf);
       btn.classList.remove("holding");
       sheet.classList.remove("shaking");
       set(0);
@@ -4356,8 +4357,7 @@
       on = true; t0 = performance.now();
       btn.classList.add("holding");
       sheet.classList.add("shaking");
-      vib(12);
-      buzz = setInterval(function () { vib(Math.round(10 + Math.min(1, (performance.now() - t0) / HOLD_MS) * 40)); }, 170);
+      vibLong(HOLD_MS + 400);                                      // 3초 내내 끊기지 않고 이어지는 진동
       (function step() {
         var p = Math.min(1, (performance.now() - t0) / HOLD_MS);
         set(p);
@@ -4365,7 +4365,7 @@
         raf = requestAnimationFrame(step);
       })();
     });
-    function early() { if (!on) return; stop(); toast("휴지통을 3초 동안 꾹 누르고 있어야 삭제돼요"); }
+    function early() { if (!on) return; stop(); vibStop(); toast("휴지통을 3초 동안 꾹 누르고 있어야 삭제돼요"); }
     btn.addEventListener("pointerup", early);
     btn.addEventListener("pointercancel", early);
     btn.addEventListener("lostpointercapture", early);

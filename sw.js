@@ -3,7 +3,7 @@
 //    → GitHub 에서 index.html 을 고치면 "그다음 번" 실행부터 반영됨
 //  · 글꼴(구글 폰트 · 에스코어드림): 한 번 받으면 계속 기기에 저장된 걸 씀
 //  · 일정 데이터(script.google.com)는 저장하지 않고 항상 서버에서 받음
-const SHELL = "timeline-shell-v5";
+const SHELL = "timeline-shell-v6";
 const FONTS = "timeline-fonts-v1";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png", "favicon.png"];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com", "cdn.jsdelivr.net"];
