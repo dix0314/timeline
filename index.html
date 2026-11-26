@@ -80,9 +80,13 @@
   body.ptint .daykey .thumb { background: hsl(var(--ph) 60% 86%); }
   button { font-family: inherit; cursor: pointer; }
 
-  /* 상단 탭 */
-  header { position: sticky; top: 0; z-index: 20; background: #fff; box-shadow: 0 1px 0 var(--line); }
-  .tabs { display: flex; align-items: center; gap: 4px; padding: 10px 12px; max-width: var(--maxw); margin: 0 auto; }   /* 위 흰 띠는 화면 끝까지, 버튼들만 가운데 */
+  /* 메뉴 바: 화면 아래에 떠 있음 (TIMELINE · 요약 · ‹ 날짜 › · 새로고침) — 달력은 이 바 위로 펼쳐짐
+     · header 자체는 투명 · 눌리지 않음 → 바(.tabs)와 달력(.cal)만 눌림 */
+  :root { --navh: 70px; }   /* 바 높이 + 아래 여백 (본문 · 알림이 가리지 않게) */
+  header { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; padding: 0 10px calc(10px + env(safe-area-inset-bottom)); pointer-events: none; }
+  .tabs { display: flex; align-items: center; gap: 4px; padding: 8px 10px; max-width: calc(var(--maxw) - 20px); margin: 0 auto; pointer-events: auto;
+    border-radius: 22px; background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: blur(16px) saturate(1.6); backdrop-filter: blur(16px) saturate(1.6);
+    box-shadow: 0 12px 30px -12px rgba(30, 20, 50, .38), 0 0 0 1px rgba(30, 20, 50, .06); }
   .tabs .tl { padding: 0 11px; font-size: 12px; }
   .tools { display: flex; gap: 4px; margin-left: 4px; padding-left: 8px; border-left: 1px solid var(--line); }
   .ibtn { width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--grey); color: #6b6b78; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
@@ -133,17 +137,18 @@
   .arrow { width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--grey); color: var(--ink); font: 700 18px/1 var(--font-num); padding: 0 0 2px; }
   .arrow:disabled { opacity: .3; cursor: default; }
   .dbtn { padding: 0 11px !important; touch-action: manipulation; display: inline-flex; align-items: center; gap: 7px; }
-  .caret { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid currentColor; transition: transform .25s cubic-bezier(.4, 0, .2, 1); }
+  .caret { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid currentColor; transition: transform .25s cubic-bezier(.4, 0, .2, 1); }   /* ▲: 달력이 위로 펼쳐짐 */
   .dbtn.open .caret { transform: rotate(-180deg); }
 
   /* 5주 달력 */
-  .cal { display: none; position: absolute; left: 0; right: 0; top: 100%; max-width: var(--maxw); margin: 0 auto; background: #fff; padding: 2px 14px 14px; border-radius: 0 0 18px 18px; box-shadow: 0 14px 24px -12px rgba(30, 30, 60, .25); }
+  .cal { display: none; position: absolute; left: 10px; right: 10px; bottom: 100%; max-width: calc(var(--maxw) - 20px); margin: 0 auto 8px; background: #fff; padding: 2px 14px 12px; border-radius: 22px;
+    box-shadow: 0 -6px 30px -10px rgba(30, 20, 50, .3), 0 0 0 1px rgba(30, 20, 50, .06); pointer-events: auto; transform-origin: 50% 100%; }
   .cal.open, .cal.closing { display: block; }
-  /* 달력: 열 때 위에서 살짝 내려오고, 닫을 때 살짝 올라가며 사라짐 */
+  /* 달력: 열 때 아래(메뉴 바)에서 살짝 올라오고, 닫을 때 살짝 내려가며 사라짐 */
   .cal.drop { animation: calDrop .24s cubic-bezier(.2, .7, .2, 1); }
   .cal.closing { animation: calLift .18s ease forwards; pointer-events: none; }
-  @keyframes calDrop { from { transform: translateY(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
-  @keyframes calLift { to { transform: translateY(-8px); opacity: 0; } }
+  @keyframes calDrop { from { transform: translateY(10px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes calLift { to { transform: translateY(10px) scale(.98); opacity: 0; } }
   /* 날짜를 넘길 때 본문이 옆에서 살짝 미끄러져 들어옴 (다음 날 → 오른쪽에서, 이전 날 → 왼쪽에서) */
   /*  · 위쪽 날짜(11. 23 · 요일)는 미끄러지지 않고 제자리 */
   #main.slide-next > :not(.hero):not(.pinned), #main.slide-next > .pinned > * { animation: pgNext .28s cubic-bezier(.2, .7, .2, 1); }
@@ -184,6 +189,27 @@
   @keyframes calTSlideIn { from { transform: translateX(var(--sx)); } to { transform: none; } }
   /* 끄는 동안: 제목 애니메이션을 멈춰 두고 손가락 위치(--t)에 맞춘 장면을 보여 줌 */
   .cal-mt.scrub *, .cal-mt.scrub *::before { animation-play-state: paused !important; }
+  /* ---------- 달 줄 (지하철) ---------- */
+  .cbot { display: flex; align-items: center; gap: 8px; margin: 10px -4px 0; padding-top: 10px; border-top: 1px solid var(--line); }
+  .cb-today { flex: none; height: 30px; padding: 0 11px; border: 0; border-radius: 999px; background: var(--grey); color: var(--ink); font: 700 12px var(--font-body); transition: opacity .2s; }
+  .cb-today.here { opacity: .45; }                                  /* 이미 이번 달 */
+  .mline { position: relative; flex: 1 1 auto; min-width: 0; height: 46px; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; cursor: grab;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent); mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent); }
+  .mlk { position: absolute; left: 50%; top: 0; z-index: 3; width: 0; height: 0; margin-left: -5px; font-style: normal;
+    border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid var(--c); transition: border-top-color .2s; animation: mkBob 1.1s ease-in-out infinite; }
+  @keyframes mkBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+  .mtrack { position: absolute; inset: 0; will-change: transform; }
+  .ln { position: absolute; top: 15px; height: 3px; border-radius: 2px; font-style: normal; }
+  .ms { position: absolute; top: 11px; width: 58px; margin-left: -29px; padding: 0; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .ms .dot { position: relative; z-index: 1; width: 11px; height: 11px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2.5px var(--c); transition: transform .2s, background .2s; font-style: normal; }
+  .ms span { font: 700 10.5px/1 var(--font-body); color: #9a9aa6; white-space: nowrap; transition: color .2s; }
+  .ms.now .dot { box-shadow: inset 0 0 0 2.5px var(--c), 0 0 0 3px #fff, 0 0 0 4.5px var(--c); }   /* 이번 달: 겹 동그라미 */
+  .ms.now span { color: var(--c); }
+  .ms.on .dot { background: var(--c); transform: scale(1.2); }
+  .ms.on span { color: var(--ink); font-weight: 800; }
+  .ms.off { pointer-events: none; }
+  .ms.off span { color: #c9c9d0; }
+  @media (prefers-reduced-motion: reduce) { .mlk { animation: none; } }
   /* 옅은 칸: 앞뒤 달 날짜 · 첫 페이지에 이미 나온 날짜 (누를 수는 있음) */
   .cday.faint { opacity: .32; }
   .cal-head, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
@@ -245,7 +271,7 @@
   .tab.dbtn { font-family: var(--font-body); font-weight: 600; }   /* "11. 24 화": 에스코어드림 Bold (6Bold) */
   .tab.active { background: var(--hot); color: #fff; }
 
-  main { max-width: var(--maxw); margin: 0 auto; padding: 0 16px 10px; }   /* 맨 아래 여백 (예전 20px 의 절반) */
+  main { max-width: var(--maxw); margin: 0 auto; padding: env(safe-area-inset-top) 16px calc(var(--navh) + 14px + env(safe-area-inset-bottom)); }   /* 아래: 떠 있는 메뉴 바만큼 비움 */
   main > .sec:last-child { margin-bottom: 5px; }   /* 맨 끝이 제목 한 줄(NO MORE KEY EVENTS)일 때 그 아래 여백도 절반 */
   .loading { text-align: center; color: var(--sub); padding: 60px 0; font: 600 13px var(--font-num); letter-spacing: 1px; }
 
@@ -966,7 +992,7 @@
   .actions button:disabled { opacity: .5; }
 
   .toast {
-    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 80;   /* 날짜·시간 고르는 창(70) 위에도 보이게 */
+    position: fixed; left: 50%; bottom: calc(var(--navh) + 18px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 80;   /* 메뉴 바 위 · 날짜·시간 고르는 창(70) 위에도 보이게 */
     max-width: 90%; background: #2a2a35; color: #fff; border-radius: 999px; padding: 10px 16px;
     font: 500 13px var(--font-body); opacity: 0; transition: opacity .2s; pointer-events: none;
   }
@@ -1801,8 +1827,7 @@
   //  · 맨 위를 보고 있었거나 시간표가 없으면(요약하기) 스크롤 값 그대로
   var heroGeo = { stuck: 0 };
   function stickyBottom() {                         // 위에 붙어 있는 영역의 아래 끝 = 상단 바 + 작아진 날짜 (어느 날짜든 같은 높이)
-    var hd = document.querySelector("header");
-    return (hd ? hd.offsetHeight : 0) + (document.querySelector("#main .hero-day") ? heroGeo.stuck : 0);
+    return document.querySelector("#main .hero-day") ? heroGeo.stuck : 0;   // 메뉴 바가 아래로 가서 위에는 날짜만 붙음
   }
   // 기준: 시간표(.grid) — 요약하기 화면이면 일정 목록(.dlist)
   function anchorEl() { return document.querySelector("#main .grid, #main .dlist"); }
@@ -1867,8 +1892,8 @@
     var hero = document.querySelector("#main .hero-day");
     state.heroCompact = !!hero && window.scrollY > 8;
     // 핵심 일정 · 메모 카드가 날짜 밑으로 다 들어갔으면 → 날짜 옆에 작은 칩
-    var pin = document.querySelector("#main .pinned"), hd = document.querySelector("header");
-    state.heroMinis = state.heroCompact && !!pin && pin.getBoundingClientRect().bottom <= (hd ? hd.offsetHeight : 0) + heroGeo.stuck + 6;
+    var pin = document.querySelector("#main .pinned");
+    state.heroMinis = state.heroCompact && !!pin && pin.getBoundingClientRect().bottom <= heroGeo.stuck + 6;
     if (hero) {
       var wasC = hero.classList.contains("compact");
       hero.classList.toggle("compact", state.heroCompact);
@@ -1915,13 +1940,15 @@
     el.innerHTML = html;
     fixDigits(el);
     renderCal();
-    // 고정 영역이 상단 바 바로 아래에 붙도록 상단 바 높이를 기록
-    var hd = document.querySelector("header");
-    if (hd) document.documentElement.style.setProperty("--hdr", hd.offsetHeight + "px");
+    // 위에 붙는 날짜는 화면 맨 위에 (메뉴 바는 아래) · 메뉴 바 높이는 본문 아래 여백 · 알림 위치에 씀
+    var bar = $("tabs"), root = document.documentElement.style;
+    root.setProperty("--hdr", "0px");
+    if (bar && bar.offsetHeight) root.setProperty("--navh", (bar.offsetHeight + 10) + "px");
   }
 
   function renderCal() {
     var el = $("cal");
+    if (state.calOpen && state.mlDrag) return;                     // 달 줄을 끄는 중: 자동 새로 읽기가 와도 다시 그리지 않음 (뗀 뒤 goPage 가 다시 그림)
     if (!state.calOpen) {
       var was = el.classList.contains("open");
       el.classList.remove("open", "drop");
@@ -1948,7 +1975,7 @@
       DAYS_KO.map(function (d, i) { return '<span class="' + (i === 0 ? "sun" : "") + '">' + d + "</span>"; }).join("") +
       '</div><div class="cal-vp"><div class="cal-track">' +
       (pg > 0 ? calGridHtml(pg - 1, tk) : '<div class="cal-page cal-none"></div>') +
-      calGridHtml(pg, tk, true) + calGridHtml(pg + 1, tk) + "</div></div>";
+      calGridHtml(pg, tk, true) + calGridHtml(pg + 1, tk) + "</div></div>" + mlineHtml(pg);
     el.innerHTML = h;
     fixDigits(el);
     // 달마다 주 수(4~6줄)가 달라서 → 달력 높이를 지금 달에 맞춰 부드럽게 늘이고 줄임
@@ -2079,6 +2106,76 @@
         '<span class="cdots">' + (past ? PAST_CHECK : dotsH) + "</span></button>";
     });
     return h + "</div></div>";
+  }
+
+  // =============================================================
+  // 달 줄 (지하철): 달력 바로 밑 한 줄 — 역 = 달 (0번 역 = 이번 달 = 달력 첫 페이지)
+  //  .cbot ├ .cb-today (↩ 오늘)
+  //        └ .mline (넘치는 부분 숨김 · 양 끝 흐림) ├ .mlk (▼ 가운데 고정 — .mk 는 날짜 화면 핵심 일정 칩이 쓰는 이름이라 다르게)
+  //                                               └ .mtrack (역이 올라탄 판 — 옆으로 미끄러짐) ├ .ln (역 사이 선) · .ms (역: .dot + "11월")
+  //  · 역 간격은 MS_GAP, 해마다 색은 YEAR_COL 만 고치면 됨
+  // =============================================================
+  var MS_GAP = 62, MS_SIDE = 14;                                   // 역 간격(px) · 가운데 앞뒤로 만드는 역 수 (끌어도 끝이 비지 않게)
+  var ML_START = new Date(2026, 10, 1);                            // 2026년 11월 — 이보다 앞 달은 회색
+  var YEAR_COL = ["#ff5a7a", "#9a6bf2", "#2fb58a"];                // 해마다 쓸 색 (분홍 → 보라 → 초록 순서로 돌아감 · 2026년 = 분홍)
+  function yearCol(y) { var n = YEAR_COL.length; return YEAR_COL[((y - 2026) % n + n) % n]; }
+  // 색을 어둡게 (f: 남길 밝기 비율)
+  function shade(hex, f) {
+    var n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255;
+    function c(v) { return ("0" + Math.round(v * f).toString(16)).slice(-2); }
+    return "#" + c(r) + c(g) + c(b);
+  }
+  // 역 하나의 색: 2026년 11월 앞 = 회색 / 지난 달 = 그 해 색을 어둡게 / 이번 달부터 = 그 해 색
+  function mlCol(p) {
+    var mo = calMonth(p);
+    if (mo < ML_START) return "#d3d3da";
+    return p < 0 ? shade(yearCol(mo.getFullYear()), .7) : yearCol(mo.getFullYear());
+  }
+  // 지금 페이지(pg)를 가운데(0번)로 두고 앞뒤 MS_SIDE 개씩 · 역 위치 = 가운데 + 번호 × MS_GAP
+  function mlineHtml(pg) {
+    var h = "";
+    for (var i = -MS_SIDE; i <= MS_SIDE; i++) {
+      var p = pg + i, mo = calMonth(p), c = mlCol(p), x = i * MS_GAP;
+      // 역 사이 선: 앞 역 색 → 70% 지점부터 다음 역 색으로
+      if (i > -MS_SIDE) h += '<i class="ln" style="left:calc(50% + ' + (x - MS_GAP) + "px);width:" + MS_GAP + "px;background:linear-gradient(90deg," + mlCol(p - 1) + " 70%," + c + ')"></i>';
+      var lab = mo.getMonth() === 0 ? String(mo.getFullYear()).slice(2) + "년 1월" : (mo.getMonth() + 1) + "월";
+      h += '<button class="ms' + (p === 0 ? " now" : "") + (p < 0 ? " off" : "") + (i === 0 ? " on" : "") + '" data-pg="' + p + '" data-i="' + i + '" style="left:calc(50% + ' + x + "px);--c:" + c + '"><i class="dot"></i><span>' + lab + "</span></button>";
+    }
+    return '<div class="cbot"><button class="cb-today' + (pg === 0 ? " here" : "") + '" data-today="1">↩ 오늘</button>' +
+      '<div class="mline"><i class="mlk" style="--c:' + mlCol(pg) + '"></i><div class="mtrack">' + h + "</div></div></div>";
+  }
+  // 달 줄을 dx(px)만큼 밀고 (ms 동안 미끄러지며) → ▼ 밑에 가장 가까운 역을 꽉 찬 점(.on)으로, ▼ 색도 그 역 색으로
+  function mlineShift(dx, ms) {
+    var ml = $("cal").querySelector(".mline");
+    if (!ml) return;
+    var tr = ml.querySelector(".mtrack"), k = Math.round(-dx / MS_GAP), on = null;
+    tr.style.transition = ms ? "transform " + ms + "ms cubic-bezier(.2, .8, .2, 1)" : "none";
+    tr.style.transform = "translateX(" + dx + "px)";
+    tr.querySelectorAll(".ms").forEach(function (st) { var hit = +st.getAttribute("data-i") === k; st.classList.toggle("on", hit); if (hit) on = st; });
+    if (on) ml.querySelector(".mlk").style.setProperty("--c", on.style.getPropertyValue("--c"));
+  }
+  // 그 페이지(달)로 넘어감 — 한 칸이면 옆 달이 들어오고, 여러 칸이면 옆 칸에 그 달을 미리 그려 두고 한 번에 넘어감
+  //  · 달 줄도 넘어가는 칸 수만큼 달력과 같은 속도로 미끄러짐
+  function goPage(to) {
+    to = Math.max(0, to);
+    var from = state.calPage || 0, n = to - from, t = calTrack();
+    if (!n || state.calAnim || !t) { mlineShift(0, 220); return; }
+    var dir = n > 0 ? 1 : -1;
+    if (Math.abs(n) > 1) {
+      var slot = t.children[dir > 0 ? 2 : 0];
+      if (slot) slot.outerHTML = calGridHtml(to, todayKey());
+    }
+    state.calAnim = true;
+    mlineShift(-n * MS_GAP, 320);
+    calTrackSet(t, 0, "transform .32s cubic-bezier(.2, .8, .2, 1)", dir);
+    setTimeout(function () {
+      state.calAnim = false;
+      state.calTr = { from: calTitle(from), to: calTitle(to) };      // 제목은 바뀐 글자만 새로 씀
+      state.calT0 = Date.now();
+      state.calScrub = null;
+      state.calPage = to;
+      if (state.calOpen) renderCal();
+    }, 340);
   }
 
   // 지난 날짜 체크 표시
@@ -2224,7 +2321,7 @@
     t.style.transform = "translateX(calc(" + (base * 100) + "% + " + (base * 16 + dx) + "px))";
   }
   $("cal").addEventListener("touchstart", function (e) {
-    if (!state.calOpen || e.touches.length !== 1 || state.calAnim) { calDrag = null; return; }
+    if (!state.calOpen || e.touches.length !== 1 || state.calAnim || e.target.closest(".cbot")) { calDrag = null; return; }
     calDrag = { x: e.touches[0].clientX, y: e.touches[0].clientY, lock: 0, dx: 0, lastX: e.touches[0].clientX, lastT: Date.now(), v: 0 };
   }, { passive: true });
   $("cal").addEventListener("touchmove", function (e) {
@@ -2241,8 +2338,10 @@
     if (dx > 0 && !(state.calPage > 0)) dx = dx * .3;            // 이번 주보다 앞은 없음 → 고무줄
     calDrag.dx = dx;
     calTrackSet(calTrack(), dx);
+    var w = $("cal").clientWidth || 360;
+    mlineShift(dx / (w + 16) * MS_GAP);                            // 달 줄도 미는 만큼 따라옴 (한 페이지 = 한 역)
     // 제목도 손가락을 따라 바뀜 (넘어갈 수 있는 쪽으로 끌 때만)
-    var w = $("cal").clientWidth || 360, sdir = dx < 0 ? 1 : (dx > 0 && state.calPage > 0) ? -1 : 0;
+    var sdir = dx < 0 ? 1 : (dx > 0 && state.calPage > 0) ? -1 : 0;
     calScrub(sdir, Math.abs(dx) / (w + 16));
   }, { passive: true });
   function calDragEnd() {
@@ -2253,6 +2352,7 @@
     var go = (Math.abs(dx) > w * .22 || (Math.abs(d.v) > .45 && Math.abs(dx) > 24)) && !(dir < 0 && !(state.calPage > 0));
     if (!go) {                                                     // 제자리로: 제목도 원래대로 되돌아감
       calTrackSet(t, 0, "transform .28s cubic-bezier(.2, .8, .2, 1)");
+      mlineShift(0, 280);
       calScrubTo(0, 280, function () { calScrub(0); });
       return;
     }
@@ -2275,9 +2375,56 @@
     if (t) t.addEventListener("transitionend", settle, { once: true });
     setTimeout(settle, 380);                                       // transitionend 가 안 오는 경우 대비
     calTrackSet(t, 0, "transform .3s cubic-bezier(.2, .8, .2, 1)", dir);
+    mlineShift(-dir * MS_GAP, 300);
   }
   $("cal").addEventListener("touchend", calDragEnd, { passive: true });
   $("cal").addEventListener("touchcancel", calDragEnd, { passive: true });
+
+  // ---------- 달 줄: 역 누르기 · 손으로 끌기 ----------
+  //  · 누름: 시작 위치 기억 / 옆으로 8px 넘게 움직이면 끌기 시작 (끄는 동안 자동 새로 읽기가 달력을 다시 그리지 않게 잠금)
+  //  · 이번 달(0번 역)보다 앞으로 끌면 고무줄처럼 덜 따라옴
+  //  · 뗌: 끈 거리 ÷ 62px 를 반올림한 칸 수만큼 넘어감 · 짧게 휙 쓸면 한 칸
+  (function () {
+    var d = null;
+    $("cal").addEventListener("pointerdown", function (e) {
+      var ml = e.target.closest(".mline");
+      if (!ml || state.calAnim || e.button > 0) return;
+      d = { x: e.clientX, t: Date.now(), on: false, dx: 0, id: e.pointerId, ml: ml };
+    });
+    $("cal").addEventListener("pointermove", function (e) {
+      if (!d || e.pointerId !== d.id) return;
+      var dx = e.clientX - d.x;
+      if (!d.on) {
+        if (Math.abs(dx) < 8) return;
+        d.on = true;
+        state.mlDrag = true;
+        try { d.ml.setPointerCapture(d.id); } catch (x) {}       // 앱 밖에서 손을 떼도 끝을 받음
+      }
+      var room = (state.calPage || 0) * MS_GAP;                      // 오른쪽(앞 달)으로 끌 수 있는 거리
+      if (dx > room) dx = room + (dx - room) * .3;
+      d.dx = dx;
+      mlineShift(dx);
+    });
+    function end(e) {
+      if (!d || (e && e.pointerId !== d.id)) return;
+      var g = d; d = null;
+      if (!g.on) return;                                             // 끌지 않았으면 → 아래 click 이 역 누르기를 처리
+      state.mlDrag = false;
+      state.mlNoClick = Date.now();
+      var n = Math.round(-g.dx / MS_GAP);
+      if (!n && Math.abs(g.dx) > 18 && Date.now() - g.t < 260) n = g.dx < 0 ? 1 : -1;   // 짧게 휙 → 한 칸
+      goPage((state.calPage || 0) + n);
+    }
+    $("cal").addEventListener("pointerup", end);
+    $("cal").addEventListener("pointercancel", end);
+    $("cal").addEventListener("click", function (e) {
+      var b = e.target.closest(".ms[data-pg], .cb-today");
+      if (!b) return;
+      e.stopPropagation();
+      if (Date.now() - (state.mlNoClick || 0) < 400) return;         // 끌고 뗀 직후의 클릭은 무시
+      goPage(b.classList.contains("cb-today") ? 0 : +b.getAttribute("data-pg"));
+    });
+  })();
 
   // 빨간 날: 화면만 먼저 바꾸고(→ 켜졌는지 돌려줌) 저장은 따로
   function holidayLocal(k) {
@@ -2919,8 +3066,8 @@
   function scrollToMemo(slot) {
     var memo = document.querySelector('#main .memos .memo[data-memo="' + slot + '"]') || document.querySelector("#main .memos");
     if (!memo) { fastScrollTop(); return; }
-    var box = memo.closest(".memos") || memo, hd = document.querySelector("header");
-    var y = box.getBoundingClientRect().top + window.scrollY - (hd ? hd.offsetHeight : 0) - heroGeo.stuck - 14;
+    var box = memo.closest(".memos") || memo;
+    var y = box.getBoundingClientRect().top + window.scrollY - heroGeo.stuck - 14;
     quickScrollTo(Math.max(0, y), function () {
       if (!slot) return;
       var el = document.querySelector('#main .memos .memo[data-memo="' + slot + '"]');
@@ -3270,8 +3417,8 @@
     //  · 넘어간 뒤 그 날짜도 칩이 보이는 상태일 때만 (그 날짜의 핵심 일정 · 메모 칸이 날짜 밑으로 들어가 있을 때)
     var nextMinis = null, showNext = false, nh = miniHtml(toK);
     if (nh && hero.classList.contains("compact")) {
-      var gp = $("main").querySelector(".day-ghost .pinned"), hd = document.querySelector("header");
-      showNext = !!gp && gp.getBoundingClientRect().bottom <= (hd ? hd.offsetHeight : 0) + heroGeo.stuck + 6;
+      var gp = $("main").querySelector(".day-ghost .pinned");
+      showNext = !!gp && gp.getBoundingClientRect().bottom <= heroGeo.stuck + 6;
     }
     if (showNext) {
       hero.insertAdjacentHTML("beforeend", nh);
